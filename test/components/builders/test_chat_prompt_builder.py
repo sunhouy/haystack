@@ -5,6 +5,7 @@
 import base64
 import json
 import logging
+from copy import deepcopy
 from typing import Any
 
 import arrow
@@ -749,6 +750,24 @@ class TestChatPromptBuilderDynamic:
         assert comp.template is None
         assert comp._variables is None
         assert comp._required_variables == "*"
+
+    def test_from_dict_does_not_mutate_the_input(self):
+        # The serialized dict often comes from somewhere the caller still owns (a pipeline config they keep
+        # around, a snapshot they load twice), so from_dict has to leave it as it found it.
+        data = {
+            "type": "haystack.components.builders.chat_prompt_builder.ChatPromptBuilder",
+            "init_parameters": {
+                "template": [ChatMessage.from_user("text and {var}").to_dict()],
+                "variables": ["var"],
+                "required_variables": ["var"],
+            },
+        }
+        original = deepcopy(data)
+
+        comp = ChatPromptBuilder.from_dict(data)
+
+        assert data == original
+        assert ChatPromptBuilder.from_dict(data).template == comp.template
 
     @pytest.mark.parametrize(
         "content_parts",

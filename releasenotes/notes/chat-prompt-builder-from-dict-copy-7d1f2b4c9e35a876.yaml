@@ -1,0 +1,7 @@
+---
+fixes:
+  - |
+    ``ChatPromptBuilder.from_dict`` no longer deserializes the template into the dictionary it is given.
+    It used to replace the serialized ``template`` entries with ``ChatMessage`` objects in place, so the
+    caller's dictionary could not be serialized again and a second ``ChatPromptBuilder.from_dict`` call on
+    the same dictionary failed with ``TypeError: argument of type 'ChatMessage' is not iterable``.

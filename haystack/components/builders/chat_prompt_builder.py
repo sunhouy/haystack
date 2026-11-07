@@ -343,7 +343,9 @@ class ChatPromptBuilder:
         :returns:
             The deserialized component.
         """
-        init_parameters = data["init_parameters"]
+        # Copy the parameters first: the caller may still want to serialize this dict again or load it a
+        # second time, and swapping the serialized template for ChatMessage objects in place breaks both.
+        init_parameters = dict(data["init_parameters"])
         template = init_parameters.get("template")
         if template:
             if isinstance(template, list):
@@ -351,4 +353,4 @@ class ChatPromptBuilder:
             elif isinstance(template, str):
                 init_parameters["template"] = template
 
-        return default_from_dict(cls, data)
+        return default_from_dict(cls, {**data, "init_parameters": init_parameters})
