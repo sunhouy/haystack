@@ -1,0 +1,7 @@
+---
+fixes:
+  - |
+    ``StructuredOutputHook`` now also strips a Markdown code fence that uses CRLF line endings. Some providers
+    wrap the whole reply in a fence with ``\r\n``, which the hook did not recognise, so the reply went to
+    ``json.loads`` with the fence still attached and every attempt failed to parse, even though the JSON inside
+    was valid. LF fences behave as before, and so does text that is not fully wrapped in a fence.

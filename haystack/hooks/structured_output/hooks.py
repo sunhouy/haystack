@@ -24,7 +24,8 @@ logger = logging.getLogger(__name__)
 _CORRECTION_META_KEY = "structured_output_correction"
 
 # A markdown code fence wrapping the whole reply, with an optional language tag such as `json`.
-_CODE_FENCE_PATTERN = re.compile(r"^```[\w-]*[ \t]*\n(.*?)\n?[ \t]*```$", re.DOTALL)
+# The line endings may be LF or CRLF, depending on the provider that produced the reply.
+_CODE_FENCE_PATTERN = re.compile(r"^```[\w-]*[ \t]*\r?\n(.*?)\r?\n?[ \t]*```$", re.DOTALL)
 
 
 class StructuredOutputHook:
@@ -255,4 +256,5 @@ def _strip_code_fence(text: str) -> str:
     Text with anything before or after the fence is returned unchanged.
     """
     match = _CODE_FENCE_PATTERN.match(text.strip())
-    return match.group(1) if match else text
+    # strip the trailing \r of a CRLF line ending, otherwise json.loads chokes on it
+    return match.group(1).rstrip("\r") if match else text
